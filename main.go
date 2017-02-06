@@ -10,8 +10,26 @@ import (
 )
 
 
-var n = flag.Bool("n", false, "omit trailing newline")
-var sep = flag.String("s", " ", "seperator")
+var l = flag.Bool("l", false, "List files from /usr/local/bin directory")
+var a = flag.Bool("a", false, "List files from both /usr/bin and /usr/local/bin directory")
+
+func lsCall(paths string, output bytes.Buffer){
+	args := strings.Split(paths, " ")
+	var cmd *exec.Cmd
+	if len(args) == 1 {
+		cmd = exec.Command("ls", args[0])
+	} else {
+		cmd = exec.Command("ls", args[0], args[1])
+	}
+	cmd.Stdout = &output
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: ", err)
+		os.Exit(1)
+	}
+	fmt.Print(output.String())
+}
+
 
 func main(){
 	cmd := exec.Command("ls", "/usr/bin/", "/usr/local/bin")
@@ -25,8 +43,6 @@ func main(){
 	fmt.Print(out.String())
 	
 	flag.Parse()
-	fmt.Print(strings.Join(flag.Args(), *sep))
-	if !*n{
-		fmt.Println()
-	}
+	var out2  bytes.Buffer
+	lsCall("/usr/bin", out2)
 }
