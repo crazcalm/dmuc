@@ -21,27 +21,27 @@ var a = flag.Bool("a", false, "List files from both /usr/bin and /usr/local/bin 
 var s = flag.String("s", "", "Applies a grep 'char' filter to the output")
 var i = flag.String("i", "", "Apllies a grep 'string' filter to the output")
 
-func createBashCommand(local *bool, all *bool, grepStartsWith *string, grepIncludes* string) []string {
-	args := []string{LS}
+func createBashCommand(local *bool, all *bool, grepStartsWith *string, grepIncludes* string) ([]string, []string) {
+	lsArgs := []string{LS}
 	if *all{
-		args = append(args, userBin)
-		args = append(args, userLocalBin)
+		lsArgs = append(lsArgs, userBin)
+		lsArgs = append(lsArgs, userLocalBin)
 	}else if *local {
-		args = append(args, userLocalBin)
+		lsArgs = append(lsArgs, userLocalBin)
 	} else {
-		args = append(args, userBin)
+		lsArgs = append(lsArgs, userBin)
 	}
 
+	grepArgs := []string{grep}
+
 	if *grepStartsWith != "" || *grepIncludes != ""{
-		args = append(args, pipe)
-		args = append(args, grep)
 		if *grepStartsWith != ""{
-			args = append(args, fmt.Sprintf("'^%s'", grepStartsWith))
+			grepArgs = append(grepArgs, fmt.Sprintf("'^%s'", grepStartsWith))
 		} else {
-			args = append(args, fmt.Sprintf("'%s'", grepIncludes))
+			grepArgs = append(grepArgs, fmt.Sprintf("'%s'", grepIncludes))
 		}
 	}
-	return args
+	return lsArgs, grepArgs
 	
 }
 
@@ -51,31 +51,42 @@ func errorHandler(err error){
 	}
 }
 
-func runCommand(args []string, output bytes.Buffer) {
-	var cmd *exec.Cmd
-	numOfArgs := len(args)
+func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) {
+	var lsCmd *exec.Cmd
+	var grepCmd *exec.Cmd
+	
+	numOfArgs := len(lsArgs)
 	fmt.Printf("num of args: %d\n", numOfArgs)
 
 	if numOfArgs == 2 {
-		cmd = exec.Command(args[0], args[1])
+		lsCmd = exec.Command(lsArgs[0], lsArgs[1])
 	} else if numOfArgs == 3 {
-		cmd = exec.Command(args[0], args[1], args[2])
-	} else if numOfArgs == 4 {
-		cmd = exec.Command(args[0], args[1], args[2], args[3])
-	} else if numOfArgs == 5 {
-		cmd = exec.Command(args[0], args[1], args[2], args[3], args[4])
-	} else if numOfArgs == 6 {
-		cmd = exec.Command(args[0], args[1], args[2], args[3], args[4], args[5])
+		lsCmd = exec.Command(lsArgs[0], lsArgs[1], lsArgs[2])
 	}
-	fmt.Println(args)
-	cmd.Stdout = &output
 
-	err := cmd.Run()
+	if len(grepArgs) == 2 {
+		grepCmd = exec.Command(grepArgs[0], grepArgs[1])
+
+		var err error
+
+		grepCmd.Stdin, err = lsCmd.StdoutPipe()
+		errorHandler(err)
+		grepCmd.Stdout = &output
+
+		err = lsCmd.Run()
+		errorHandler(err)
+
+		err = grepCmd.Run()
+		errorHandler(err)
+	} else {
+		lsCmd.Stdout = &output
+		err := lsCmd.Run()
+		errorHandler(err)
+	}
 
 	fmt.Print("output: ")
 	fmt.Println(output.String())
 
-	errorHandler(err)
 }
 
 func printToScreen(content string) {
@@ -87,7 +98,7 @@ func main() {
 	flag.Parse()
 
 	var output bytes.Buffer
-	args := createBashCommand(l,a,s,i)
-	runCommand(args, output)
+	lsArgs, grepArgs := createBashCommand(l,a,s,i)
+	runCommand(lsArgs, grepArgs, output)
 	printToScreen(output.String())
 }
