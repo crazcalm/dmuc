@@ -4,74 +4,90 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"os"
 	"os/exec"
-	"strings"
+	"log"
+)
+
+const (
+	userBin = "/usr/bin/"
+	userLocalBin = "/usr/local/bin/"
+	pipe = "|"
+	grep = "grep"
+	LS = "ls"
 )
 
 var l = flag.Bool("l", false, "List files from /usr/local/bin directory")
 var a = flag.Bool("a", false, "List files from both /usr/bin and /usr/local/bin directory")
-var grep1 = flag.String("s", "", "Applies a grep 'char' filter to the output")
-var grep2 = flag.String("i", "", "Apllies a grep 'string' filter to the output")
+var s = flag.String("s", "", "Applies a grep 'char' filter to the output")
+var i = flag.String("i", "", "Apllies a grep 'string' filter to the output")
 
-func grepCalls(paths string, output bytes.Buffer, grepString string, charGrep bool) string {
-	args := strings.Split(paths, " ")
-	var grepArg string
-	var cmd *exec.Cmd
-
-	if charGrep {
-		grepArg = fmt.Sprintf("^%s", grepString)
+func createBashCommand(local *bool, all *bool, grepStartsWith *string, grepIncludes* string) []string {
+	args := []string{LS}
+	if *all{
+		args = append(args, userBin)
+		args = append(args, userLocalBin)
+	}else if *local {
+		args = append(args, userLocalBin)
 	} else {
-		grepArg = grepString
+		args = append(args, userBin)
 	}
+
+	if *grepStartsWith != "" || *grepIncludes != ""{
+		args = append(args, pipe)
+		args = append(args, grep)
+		if *grepStartsWith != ""{
+			args = append(args, fmt.Sprintf("'^%s'", grepStartsWith))
+		} else {
+			args = append(args, fmt.Sprintf("'%s'", grepIncludes))
+		}
+	}
+	return args
 	
-	if len(args) == 1 {
-		cmd = exec.Command("ls", args[0], "grep", grepArg)
-	}else{
-		cmd = exec.Command("ls", args[0], args[1], "grep", grepArg)
-	}
-	cmd.Stdout = &output
-	err := cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: ", err)
-		os.Exit(1)
-	}
-	return output.String()
 }
 
-func lsCall(paths string, output bytes.Buffer) string {
-	args := strings.Split(paths, " ")
+func errorHandler(err error){
+	if err !=nil {
+		log.Fatal(err)
+	}
+}
+
+func runCommand(args []string, output bytes.Buffer) {
 	var cmd *exec.Cmd
-	if len(args) == 1 {
-		cmd = exec.Command("ls", args[0])
-	} else {
-		cmd = exec.Command("ls", args[0], args[1])
+	numOfArgs := len(args)
+	fmt.Printf("num of args: %d\n", numOfArgs)
+
+	if numOfArgs == 2 {
+		cmd = exec.Command(args[0], args[1])
+	} else if numOfArgs == 3 {
+		cmd = exec.Command(args[0], args[1], args[2])
+	} else if numOfArgs == 4 {
+		cmd = exec.Command(args[0], args[1], args[2], args[3])
+	} else if numOfArgs == 5 {
+		cmd = exec.Command(args[0], args[1], args[2], args[3], args[4])
+	} else if numOfArgs == 6 {
+		cmd = exec.Command(args[0], args[1], args[2], args[3], args[4], args[5])
 	}
+	fmt.Println(args)
 	cmd.Stdout = &output
+
 	err := cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: ", err)
-		os.Exit(1)
-	}
-	return output.String()
+
+	fmt.Print("output: ")
+	fmt.Println(output.String())
+
+	errorHandler(err)
 }
 
 func printToScreen(content string) {
-	fmt.Print(content)
+	fmt.Println(content)
+	fmt.Println("over")
 }
 
 func main() {
-	cmd := exec.Command("ls", "/usr/bin/", "/usr/local/bin")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: ", err)
-		os.Exit(1)
-	}
-	printToScreen(out.String())
-
 	flag.Parse()
-	var out2 bytes.Buffer
-	printToScreen(lsCall("/usr/bin", out2))
+
+	var output bytes.Buffer
+	args := createBashCommand(l,a,s,i)
+	runCommand(args, output)
+	printToScreen(output.String())
 }
