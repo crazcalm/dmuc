@@ -11,7 +11,6 @@ import (
 const (
 	userBin = "/usr/bin/"
 	userLocalBin = "/usr/local/bin/"
-	pipe = "|"
 	grep = "grep"
 	LS = "ls"
 )
@@ -66,17 +65,20 @@ func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) {
 
 	if len(grepArgs) == 2 {
 		grepCmd = exec.Command(grepArgs[0], grepArgs[1])
-
 		var err error
 
-		grepCmd.Stdin, err = lsCmd.StdoutPipe()
-		errorHandler(err)
 		grepCmd.Stdout = &output
 
-		err = lsCmd.Run()
+		grepCmd.Stdin, err = lsCmd.StdoutPipe()
+		grepCmd.Start()
 		errorHandler(err)
 
-		err = grepCmd.Run()
+		err = lsCmd.Run()
+		fmt.Print("run lsCmd")
+		errorHandler(err)
+
+		err = grepCmd.Wait()
+		fmt.Print("grepCmd")
 		errorHandler(err)
 	} else {
 		lsCmd.Stdout = &output
