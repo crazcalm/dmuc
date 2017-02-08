@@ -35,9 +35,9 @@ func createBashCommand(local *bool, all *bool, grepStartsWith *string, grepInclu
 
 	if *grepStartsWith != "" || *grepIncludes != ""{
 		if *grepStartsWith != ""{
-			grepArgs = append(grepArgs, fmt.Sprintf("'^%s'", grepStartsWith))
+			grepArgs = append(grepArgs, fmt.Sprintf("^%s", *grepStartsWith))
 		} else {
-			grepArgs = append(grepArgs, fmt.Sprintf("'%s'", grepIncludes))
+			grepArgs = append(grepArgs, fmt.Sprintf("%s", *grepIncludes))
 		}
 	}
 	return lsArgs, grepArgs
@@ -73,10 +73,13 @@ func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) {
 		grepCmd.Start()
 		errorHandler(err)
 
-		err = lsCmd.Run()
+		err = lsCmd.Start()
 		fmt.Print("run lsCmd")
 		errorHandler(err)
 
+		err = lsCmd.Wait()
+		errorHandler(err)
+		
 		err = grepCmd.Wait()
 		fmt.Print("grepCmd")
 		errorHandler(err)
