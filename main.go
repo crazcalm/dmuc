@@ -1,18 +1,10 @@
-package main
+package dmuc
 
 import (
 	"bytes"
 	"flag"
 	"fmt"
-	"log"
 	"os/exec"
-)
-
-const (
-	userBin      = "/usr/bin/"
-	userLocalBin = "/usr/local/bin/"
-	grep         = "grep"
-	LS           = "ls"
 )
 
 var l = flag.Bool("l", false, "List files from /usr/local/bin directory")
@@ -23,15 +15,15 @@ var i = flag.String("i", "", "Apllies a grep 'string' filter to the output")
 func createBashCommand(local *bool, all *bool, grepStartsWith *string, grepIncludes *string) ([]string, []string) {
 	lsArgs := []string{LS}
 	if *all {
-		lsArgs = append(lsArgs, userBin)
-		lsArgs = append(lsArgs, userLocalBin)
+		lsArgs = append(lsArgs, USERBIN)
+		lsArgs = append(lsArgs, USERLOCALBIN)
 	} else if *local {
-		lsArgs = append(lsArgs, userLocalBin)
+		lsArgs = append(lsArgs, USERLOCALBIN)
 	} else {
-		lsArgs = append(lsArgs, userBin)
+		lsArgs = append(lsArgs, USERBIN)
 	}
 
-	grepArgs := []string{grep}
+	grepArgs := []string{GREP}
 
 	if *grepStartsWith != "" || *grepIncludes != "" {
 		if *grepStartsWith != "" {
@@ -44,11 +36,6 @@ func createBashCommand(local *bool, all *bool, grepStartsWith *string, grepInclu
 
 }
 
-func errorHandler(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) string {
 	var lsCmd *exec.Cmd
@@ -70,13 +57,13 @@ func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) string 
 
 		grepCmd.Stdin, err = lsCmd.StdoutPipe()
 		grepCmd.Start()
-		errorHandler(err)
+		ErrorHandler(err)
 
 		err = lsCmd.Start()
-		errorHandler(err)
+		ErrorHandler(err)
 
 		err = lsCmd.Wait()
-		errorHandler(err)
+		ErrorHandler(err)
 
 		// There is an error when the output is empty
 		//So... ignore it?
@@ -84,7 +71,7 @@ func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) string 
 	} else {
 		lsCmd.Stdout = &output
 		err := lsCmd.Run()
-		errorHandler(err)
+		ErrorHandler(err)
 	}
 
 	return output.String()
