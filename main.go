@@ -3,15 +3,14 @@ package dmuc
 import (
 	"bytes"
 	"flag"
-	"os/exec"
 	"os"
+	"os/exec"
 )
 
 var l = flag.Bool("l", false, "List files from /usr/local/bin directory")
 var a = flag.Bool("a", false, "List files from both /usr/bin and /usr/local/bin directory")
 var s = flag.String("s", "", "Applies a grep 'char' filter to the output")
 var i = flag.String("i", "", "Apllies a grep 'string' filter to the output")
-
 
 func runCommand(lsArgs []string, grepArgs []string, output bytes.Buffer) string {
 	var lsCmd *exec.Cmd

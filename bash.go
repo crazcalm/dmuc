@@ -19,10 +19,10 @@ func CreateBashCommand(local, all *bool, grepStartsWith, grepIncludes *string) (
 	grepArgs := []string{GREP}
 
 	if *grepStartsWith != "" || *grepIncludes != "" {
-		if *grepStartsWith != "" {
-			grepArgs = append(grepArgs, fmt.Sprintf("^%s", *grepStartsWith))
-		} else {
+		if *grepIncludes != "" {
 			grepArgs = append(grepArgs, fmt.Sprintf("%s", *grepIncludes))
+		} else {
+			grepArgs = append(grepArgs, fmt.Sprintf("^%s", *grepStartsWith))
 		}
 	}
 
