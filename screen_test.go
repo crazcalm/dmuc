@@ -1,14 +1,15 @@
 package dmuc
 
-import(
-	"testing"
+import (
 	"bytes"
+	"strings"
+	"testing"
 )
 
-func TestPrintToScreen(t *testing.T){
-	var tests = []struct{
+func TestPrintToScreen(t *testing.T) {
+	var tests = []struct {
 		input string
-		want string
+		want  string
 	}{
 		{"", "None"},
 		{"hello", "hello"},
@@ -19,9 +20,10 @@ func TestPrintToScreen(t *testing.T){
 		PrintToScreen(b, test.input)
 
 		got = b.String()
-		
-		if got != test.want{
-			t.Errorf("PrintToScreen(%s) = %s", test.input, got)
+
+		if strings.Contains(test.want, got) {
+			t.Errorf("PrintToScreen(%s):  %s not in %s", test.input, test.want, got)
 		}
+		b.Reset()
 	}
 }
