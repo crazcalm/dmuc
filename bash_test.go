@@ -1,6 +1,11 @@
 package dmuc
 
 import (
+	"bytes"
+	"fmt"
+	"log"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -15,6 +20,41 @@ func compare(a []string, b []string) bool {
 		}
 	}
 	return true
+}
+
+func TestRunCommand(t *testing.T) {
+	//If I could get the pwd dir via go, that would be ideal.
+	//That way I could compare the dir name to the ls output.
+	//I should use "path/filepath"
+	var output bytes.Buffer
+	path, err := filepath.Abs(".")
+	if err != nil {
+		log.Fatal("failed to create a path variable for testing the RunCommand")
+	}
+
+	var tests = []struct {
+		lsArgs   []string
+		grepArgs []string
+		output   bytes.Buffer
+		contains []string
+	}{
+		{[]string{LS, path}, []string{GREP}, output, []string{"bash_test.go", "bash.go"}},
+		{[]string{LS, path, path}, []string{GREP}, output, []string{"/dmuc"}},
+		{[]string{LS, path}, []string{GREP, "test"}, output, []string{"bash_test.go", "screen_test.go"}},
+		{[]string{LS, path}, []string{GREP, "^t"}, output, []string{"constants.go", "bash_test.go"}},
+	}
+
+	for _, test := range tests {
+		result := RunCommand(test.lsArgs, test.grepArgs, test.output)
+
+		fmt.Println(result)
+
+		for _, value := range test.contains {
+			if !strings.Contains(result, value) {
+				t.Errorf("RunCommand(%v, %v, %v)\n%s in in %s", test.lsArgs, test.grepArgs, test.output, value, result)
+			}
+		}
+	}
 }
 
 func TestCreateBashCommand(t *testing.T) {
@@ -45,5 +85,4 @@ func TestCreateBashCommand(t *testing.T) {
 			t.Errorf("CreateBashCommand(%t, %t, %s, %s)\ngrepArgs: %v != %v", test.local, test.all, test.grepStartsWith, test.grepIncludes, gotGrep, test.grepArgs)
 		}
 	}
-
 }
