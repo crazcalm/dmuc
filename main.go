@@ -11,7 +11,8 @@ var a = flag.Bool("a", false, "List files from both /usr/bin and /usr/local/bin 
 var s = flag.String("s", "", "Applies a grep 'char' filter to the output")
 var i = flag.String("i", "", "Apllies a grep 'string' filter to the output")
 
-func main() {
+// Main This function starts the program
+func Main() {
 	flag.Parse()
 
 	var output bytes.Buffer
