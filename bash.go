@@ -4,7 +4,78 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
+	"os"
+	"log"
 )
+
+func LsCommand(dirName string) []string {
+        //learn how to check if it is a directory
+        stat, err := os.Stat(dirName)
+        if err != nil {
+                log.Fatal(err)
+        }
+        if stat.IsDir() != true {
+                log.Fatalf("%s is not a directory", dirName)
+        }
+
+        f, err := os.Open(dirName)
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        names, err := f.Readdirnames(-1)
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        return names
+}
+
+func Filter(content []string, filter string, startsWith bool) []string{
+        var result []string
+
+        // Starts with filter
+        if startsWith == true {
+                for _, item := range content {
+                        if strings.HasPrefix(item, filter) {
+                                result = append(result, item)
+                        }
+                }
+        } else { // Includes filter
+                for _, item := range content {
+                        if strings.Contains(item, filter) {
+                                result = append(result, item)
+                        }
+                }
+        }
+        return result
+}
+
+func CreateCommand(local, all *bool, startsWith, includes *string) ([]string, string, bool) {
+	var dirs  []string
+	if *all {
+		dirs = append(dirs, USERBIN)
+		dirs = append(dirs, USERLOCALBIN)
+	} else if *local {
+		dirs = append(dirs, USERLOCALBIN)
+	} else {
+		dirs = append(dirs, USERBIN)
+	}
+
+	var filter string
+	var startFilter bool
+
+	if *startsWith != "" || *includes != "" {
+		if *includes != "" {
+			filter = *includes
+		} else {
+			filter = *startsWith
+			startFilter = true
+		}
+	}
+	return dirs, filter, startFilter
+}
 
 // CreateBashCommand compiles the arguements needed for running the ls and grep commands
 func CreateBashCommand(local, all *bool, grepStartsWith, grepIncludes *string) ([]string, []string) {
