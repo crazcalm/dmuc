@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+//LsCommand returns the items in a directory
 func LsCommand(dirName string) []string {
 	//learn how to check if it is a directory
 	stat, err := os.Stat(dirName)
@@ -31,6 +32,8 @@ func LsCommand(dirName string) []string {
 	return names
 }
 
+//Filter uses a string to filter a slice of strings.
+//You can filter by 'include' and 'startsWith'
 func Filter(content []string, filter string, startsWith bool) []string {
 	var result []string
 
@@ -52,6 +55,8 @@ func Filter(content []string, filter string, startsWith bool) []string {
 	return result
 }
 
+//CreateCommand formats the flag arguements into a state that is usable by other
+//functions in this package
 func CreateCommand(local, all *bool, startsWith, includes *string) ([]string, string, bool) {
 	var dirs []string
 	if *all {
@@ -77,6 +82,7 @@ func CreateCommand(local, all *bool, startsWith, includes *string) ([]string, st
 	return dirs, filter, startFilter
 }
 
+//Run runs the program
 func Run(dirs []string, filter string, startFilter bool) {
 	for _, dir := range dirs {
 		items := LsCommand(dir)
