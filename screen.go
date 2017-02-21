@@ -6,8 +6,8 @@ import (
 )
 
 // PrintToScreen prints the results to screen
-func PrintToScreen(w io.Writer, content string) {
-	fmt.Fprintln(w, "See Results Below: ")
+func PrintToScreen(w io.Writer, content, dir string) {
+	fmt.Fprintf(w, "%s:\n", dir)
 	if content == "" {
 		fmt.Fprintln(w, "None")
 	} else {

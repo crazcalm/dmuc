@@ -9,20 +9,25 @@ import (
 func TestPrintToScreen(t *testing.T) {
 	var tests = []struct {
 		input string
-		want  string
+		dir   string
+		want  []string
 	}{
-		{"", "None"},
-		{"hello", "hello"},
+		{"", "", []string{"None"}},
+		{"hello", "", []string{"hello"}},
+		{"", "dir", []string{"None", "dir"}},
+		{"hello", "dir", []string{"hello", "dir"}},
 	}
 	b := new(bytes.Buffer)
 	var got string
 	for _, test := range tests {
-		PrintToScreen(b, test.input)
+		PrintToScreen(b, test.input, test.dir)
 
 		got = b.String()
 
-		if strings.Contains(test.want, got) {
-			t.Errorf("PrintToScreen(%s):  %s not in %s", test.input, test.want, got)
+		for _, item := range test.want {
+			if strings.Contains(item, got) {
+				t.Errorf("PrintToScreen(%s):  %s not in %s", test.input, test.want, got)
+			}
 		}
 		b.Reset()
 	}
