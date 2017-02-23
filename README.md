@@ -31,7 +31,7 @@ Install:
 
 Usage:
 ------
-	Usage of ./main2:
+	Usage of dmuc:
 		-a	List files from both /usr/bin and /usr/local/bin directory
 		-i string
 			Filters putput based on if the content starts with the provided string
