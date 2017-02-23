@@ -9,7 +9,7 @@ Back Story:
 Install:
 -------
 * go get github.com/crazcalm/dmuc
-* Copy the below fale (dmuc.go):
+* Copy the code below (dmuc.go):
 		package main
 
 		import (
