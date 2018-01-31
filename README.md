@@ -1,5 +1,6 @@
 dmuc
 ====
+[![Go Report Card](https://goreportcard.com/badge/github.com/crazcalm/dmuc)](https://goreportcard.com/report/github.com/crazcalm/dmuc)
 
 Back Story:
 -----------
