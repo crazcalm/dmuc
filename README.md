@@ -1,6 +1,6 @@
 dmuc
 ====
-[![Go Report Card](https://goreportcard.com/badge/github.com/crazcalm/dmuc)](https://goreportcard.com/report/github.com/crazcalm/dmuc)
+[![Build Status](https://api.travis-ci.org/crazcalm/dmuc.svg?branch=master)](https://travis-ci.org/crazcalm/dmuc)     [![Go Report Card](https://goreportcard.com/badge/github.com/crazcalm/dmuc)](https://goreportcard.com/report/github.com/crazcalm/dmuc)
 
 Back Story:
 -----------
