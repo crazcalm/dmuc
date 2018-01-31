@@ -55,7 +55,7 @@ func Filter(content []string, filter string, startsWith bool) []string {
 	return result
 }
 
-//CreateCommand formats the flag arguements into a state that is usable by other
+//CreateCommand formats the flag arguments into a state that is usable by other
 //functions in this package
 func CreateCommand(local, all *bool, startsWith, includes *string) ([]string, string, bool) {
 	var dirs []string
